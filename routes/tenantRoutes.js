@@ -20,6 +20,20 @@ router.get("/", async (req, res) => {
   res.json(tenants);
 });
 
+//get tenants with specified room price
+
+router.get("/:user",async (req,res)=>{
+  try{
+    const user=req.params.user;
+    const tenants=await Tenant.find({user});
+    res.json(tenants);
+  }catch(err){
+    res.status(500).json({message:err.message});
+
+  }
+  
+});
+
 // Update Tenant
 router.put("/:id", async (req, res) => {
   try {
