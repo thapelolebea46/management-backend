@@ -14,13 +14,10 @@ router.post("/", async (req, res) => {
   }
 });
 
-// Get All Tenants from the database mongoDB
-router.get("/", async (req, res) => {
-  const tenants = await Tenant.find();
-  res.json(tenants);
-});
 
-//get tenants with specified room price
+
+
+//get tenants with belonging to a user
 
 router.get("/:user",async (req,res)=>{
   try{
@@ -33,6 +30,40 @@ router.get("/:user",async (req,res)=>{
   }
   
 });
+// ADD a complaint to tenant
+router.post("/add-complaint/:tenantId", async (req, res) => {
+  const { complaint } = req.body;
+
+  if (!complaint)
+    return res.status(400).json({ message: "Complaint text required" });
+
+  try {
+    const tenant = await Tenant.findById(req.params.tenantId);
+    if (!tenant) return res.status(404).json({ message: "Tenant not found" });
+
+    tenant.complaints.push(complaint);
+    await tenant.save();
+
+    res.json({ message: "Complaint added", tenant });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+
+// GET complaints for a tenant
+router.get("/complaints/:tenantId", async (req, res) => {
+  try {
+    const tenant = await Tenant.findById(req.params.tenantId);
+    if (!tenant) return res.status(404).json({ message: "Not found" });
+
+    res.json(tenant.complaints);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+
 
 // Update Tenant
 router.put("/:id", async (req, res) => {
@@ -40,6 +71,7 @@ router.put("/:id", async (req, res) => {
     const updated = await Tenant.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
     });
+ 
     res.json(updated);
   } catch (err) {
     res.status(400).json({ message: err.message });
