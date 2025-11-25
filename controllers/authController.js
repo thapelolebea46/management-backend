@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 
 export const register = async (req, res) => {
   try {
-    const { firstName, lastName, username, password } = req.body;
+    const { firstName, lastName, username,address, password } = req.body;
 
     const userExists = await User.findOne({ username });
     if (userExists) return res.json({ msg: "Username already exists" });
@@ -15,8 +15,11 @@ export const register = async (req, res) => {
       firstName,
       lastName,
       username,
+      address,
       password: hashedPwd,
+      
     });
+    console.log(newUser.address);
 
     res.json({ msg: "User registered successfully", user: newUser });
   } catch (error) {
@@ -34,7 +37,7 @@ export const login = async (req, res) => {
   if (!isMatch) return res.json({ msg: "Invalid password" });
 
   const token = jwt.sign(
-    { id: user._id, firstName: user.firstName, lastName: user.lastName },
+    { id: user._id, firstName: user.firstName, lastName: user.lastName , address:user.address},
     "SECRETKEY",
     { expiresIn: "1d" }
   );

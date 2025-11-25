@@ -7,7 +7,7 @@ const router = express.Router();
 
 // REGISTER
 router.post("/register", async (req, res) => {
-  const { username, firstName, lastName, password } = req.body;
+  const { username, firstName, lastName,address, password } = req.body;
 
   const userExists = await User.findOne({ username });
   if (userExists) return res.json({ error: "Username already exists" });
@@ -18,11 +18,13 @@ router.post("/register", async (req, res) => {
     username,
     firstName,
     lastName,
+      address,
     password: hashed,
+  
   });
 
   await newUser.save();
-
+  console.log("Account created")
   res.json({ message: "Account created successfully" });
 });
 
@@ -42,6 +44,7 @@ router.post("/login", async (req, res) => {
       firstName: user.firstName,
       lastName: user.lastName,
       username: user.username,
+      address: user.address,
     },
     process.env.JWT_SECRET,
     { expiresIn: "3d" }
