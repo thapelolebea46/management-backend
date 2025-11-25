@@ -27,7 +27,33 @@ router.post("/register", async (req, res) => {
   console.log("Account created")
   res.json({ message: "Account created successfully" });
 });
+//INFORMATION UPDATING ROUTE
+router.put("/update-info", async (req, res) => {
+  try {
+    const { firstName, lastName, address, password , id} = req.body;
 
+    const updates = { firstName, lastName, address };
+
+    // Only update password if provided
+    if (password && password.trim() !== "") {
+      const salt = await bcrypt.genSalt(10);
+      console.log(password);
+      updates.password = await bcrypt.hash(password, salt);
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.body.id,
+      { $set: updates },  
+      { new: true }
+    );
+    console.log(req.body.id,": updated successfully: ",password);
+
+    res.json({ message: "Profile updated successfully", user: updatedUser });
+  } catch (error) {
+    console.error(error);
+    res.json({ error: "Server error" });
+  }
+});
 // LOGIN
 router.post("/login", async (req, res) => {
   const { username, password } = req.body;
@@ -53,15 +79,6 @@ router.post("/login", async (req, res) => {
   res.json({ message: "Login successful", token });
 });
 
-// UPDATE PASSWORD
-router.post("/update-password", async (req, res) => {
-  const { username, newPassword } = req.body;
 
-  const hashed = await bcrypt.hash(newPassword, 10);
-
-  await User.findOneAndUpdate({ username }, { password: hashed });
-
-  res.json({ message: "Password updated" });
-});
 
 export default router;

@@ -2,13 +2,13 @@ import express from "express";
 import {
   register,
   login,
-  updatePassword,
+  updateInfo,
 } from "../controllers/authController.js";
 
 const router = express.Router();
 
+router.put("/update-info",updateInfo);
 router.post("/register", register);
 router.post("/login", login);
-router.put("/update-password", updatePassword);
 
 export default router;

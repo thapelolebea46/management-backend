@@ -45,12 +45,44 @@ export const login = async (req, res) => {
   res.json({ msg: "Logged in", token });
 };
 
-export const updatePassword = async (req, res) => {
-  const { username, newPassword } = req.body;
+export const updateInfo = async (req, res) => {
+  const { firstName, lastName, address, oldPassword, newPassword } = req.body;
 
-  const hashed = await bcrypt.hash(newPassword, 10);
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.json({ msg: "User not found" });
 
-  await User.findOneAndUpdate({ username }, { password: hashed });
+    // Check old password
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) return res.json({ msg: "Old password is incorrect" });
 
-  res.json({ msg: "Password updated" });
+    // Update allowed fields
+    if (firstName) user.firstName = firstName;
+    if (lastName) user.lastName = lastName;
+    if (address) user.address = address;
+
+    // Only update password if provided
+    if (newPassword && newPassword.trim() !== "") {
+      const hashed = await bcrypt.hash(newPassword, 10);
+      user.password = hashed;
+    }
+
+    await user.save();
+
+    // Generate new token with updated info
+    const token = jwt.sign(
+      {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        address: user.address,
+      },
+      "SECRETKEY",
+      { expiresIn: "1d" }
+    );
+
+    return res.json({ msg: "Information updated", token });
+  } catch (err) {
+    return res.json({ msg: "Server error" });
+  }
 };
