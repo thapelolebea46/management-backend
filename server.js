@@ -12,5 +12,5 @@ app.use(cors());
 app.use(express.json());
 app.use("/api/tenants", tenantRoutes);
 
-const PORT = process.env.PORT || 5000;
+const PORT =  3001;
 app.listen(PORT, () => console.log(`Tenant Server running on port ${PORT}`));
